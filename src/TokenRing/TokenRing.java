@@ -48,6 +48,7 @@ public class TokenRing {
             outToServer.writeBytes(trPackage.getPackage());
             clientSocket.close();
         } catch (Exception ex) {
+            Controller.alert(ex.getMessage());
             ex.printStackTrace();
         }
     }
@@ -66,13 +67,15 @@ public class TokenRing {
     }
 
     public void setMonitor() {
+        isMonitor = true;
         priority = Integer.MAX_VALUE;
         initialToken();
         runTokenTimeoutControl();
     }
 
+    TimerTask tokenTimeoutTask;
     void runTokenTimeoutControl() {
-        TimerTask tokenTimeoutTask = new TimerTask() {
+        tokenTimeoutTask = new TimerTask() {
             @Override
             public void run() {
                 initialToken();
