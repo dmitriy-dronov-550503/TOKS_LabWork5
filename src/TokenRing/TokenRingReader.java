@@ -57,23 +57,25 @@ public class TokenRingReader extends Thread {
     }
 
     public void stopReader() throws Exception {
-        serverSocket.close();
+        if(serverSocket!=null) serverSocket.close();
         if(connectionSocket!=null) connectionSocket.close();
         if(inFromClient!=null) inFromClient.close();
     }
 
     @Override
     public void run() {
+        int triesToConnect = 10;
         try {
             serverSocket = new ServerSocket(tokenRing.portThis);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        while (tokenRing.isReaderWorking) {
+        while (tokenRing.isReaderWorking && triesToConnect>0) {
             try {
                 try {
                     connectionSocket = serverSocket.accept();
                 } catch (Exception ex) {
+                    triesToConnect--;
                     System.out.println("Socket closed");
                     throw new Exception("Thread break");
                 }
