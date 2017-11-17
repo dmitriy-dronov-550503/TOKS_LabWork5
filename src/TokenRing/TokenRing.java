@@ -69,8 +69,9 @@ public class TokenRing {
     public void setMonitor() {
         isMonitor = true;
         priority = Integer.MAX_VALUE;
-        initialToken();
         runTokenTimeoutControl();
+        initialToken();
+
     }
 
     TimerTask tokenTimeoutTask;

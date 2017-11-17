@@ -34,17 +34,22 @@ public class Controller {
     }
     private void startButtonAction(){
         if (startButton.getText().equals("Start")) {
-            tokenRing = new TokenRing(messageInField, messagePurposeField,
-                    ipField.getText(),
-                    Integer.parseInt(portInField.getText()),
-                    Integer.parseInt(portOutField.getText()),
-                    Integer.parseInt(priorityField.getText())
-            );
-            tokenRing.start();
-            if (monitorCheck.isSelected()) {
-                tokenRing.setMonitor();
+            try{
+                tokenRing = new TokenRing(messageInField, messagePurposeField,
+                        ipField.getText(),
+                        Integer.parseInt(portInField.getText()),
+                        Integer.parseInt(portOutField.getText()),
+                        Integer.parseInt(priorityField.getText())
+                );
+                tokenRing.start();
+                if (monitorCheck.isSelected()) {
+                    tokenRing.setMonitor();
+                }
+                startButton.setText("Stop");
             }
-            startButton.setText("Stop");
+            catch (NumberFormatException ex){
+                alert("Please, fill all fields.");
+            }
         } else {
             tokenRing.stop();
             startButton.setText("Start");
@@ -60,7 +65,12 @@ public class Controller {
     public static void alert(String message){
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Warning!");
+        alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void stop(){
+        if(tokenRing!=null) tokenRing.stop();
     }
 }

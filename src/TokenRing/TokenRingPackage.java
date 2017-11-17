@@ -10,6 +10,7 @@ public class TokenRingPackage{
     public int R = 0;
     public boolean T = true;
     public boolean A = false;
+    public boolean E = false;
     public int DA = 0;
     public int SA = 0;
     public String INFO = "";

@@ -2,6 +2,7 @@ package TokenRing;
 
 import com.google.gson.Gson;
 import javafx.scene.control.TextField;
+import sample.Controller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,6 +17,7 @@ public class TokenRingReader extends Thread {
     volatile Socket connectionSocket;
     volatile BufferedReader inFromClient;
     volatile ServerSocket serverSocket;
+    String lastPackage = "";
 
     public TokenRingReader(TokenRing tokenRing) {
         this.tokenRing = tokenRing;
@@ -42,6 +44,10 @@ public class TokenRingReader extends Thread {
             tokenRing.messagePurpose.set(trPackage.INFO);
             trPackage.A = true;
         }
+        if (trPackage.SA == tokenRing.portThis && trPackage.E) {
+            tokenRing.messagePurpose.set("Error. Can't find station on port: " + trPackage.DA);
+            trPackage.E = false;
+        }
         if (trPackage.SA == tokenRing.portThis && trPackage.A) {
             trPackage.SA = 0;
             trPackage.DA = 0;
@@ -49,6 +55,7 @@ public class TokenRingReader extends Thread {
             trPackage.P = trPackage.R;
             trPackage.R = 0;
             trPackage.T = true;
+            trPackage.A = false;
         } else {
             if (!tokenRing.messages.empty()) {
                 resolvePriority(trPackage);
@@ -57,9 +64,9 @@ public class TokenRingReader extends Thread {
     }
 
     public void stopReader() throws Exception {
-        if(serverSocket!=null) serverSocket.close();
-        if(connectionSocket!=null) connectionSocket.close();
-        if(inFromClient!=null) inFromClient.close();
+        if (serverSocket != null) serverSocket.close();
+        if (connectionSocket != null) connectionSocket.close();
+        if (inFromClient != null) inFromClient.close();
     }
 
     @Override
@@ -70,7 +77,7 @@ public class TokenRingReader extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        while (tokenRing.isReaderWorking && triesToConnect>0) {
+        while (tokenRing.isReaderWorking && triesToConnect > 0) {
             try {
                 try {
                     connectionSocket = serverSocket.accept();
@@ -84,6 +91,15 @@ public class TokenRingReader extends Thread {
                         new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
                 String clientSentence = inFromClient.readLine();
                 trPackage = new Gson().fromJson(clientSentence, TokenRingPackage.class);
+                if (tokenRing.isMonitor && !trPackage.T) {
+                    if (lastPackage.equals(clientSentence)) {
+                        trPackage.A = true;
+                        trPackage.E = true;
+                        lastPackage = "";
+                    } else {
+                        lastPackage = clientSentence;
+                    }
+                }
                 tokenRing.message.set("TOKEN " + trPackage.INFO);
                 makeDecision(trPackage);
                 TimeUnit.MILLISECONDS.sleep(1000);

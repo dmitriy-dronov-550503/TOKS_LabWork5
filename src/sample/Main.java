@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 public class Main extends Application {
 
-    TokenRing tokenRing;
     Controller controller = new Controller();
 
     @Override
@@ -73,7 +72,7 @@ public class Main extends Application {
 
     @Override
     public void stop() {
-        if(tokenRing!=null) tokenRing.stop();
+        controller.stop();
         try {
             super.stop();
         } catch (Exception e) {
